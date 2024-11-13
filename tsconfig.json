@@ -25,10 +25,9 @@
         "name": "next"
       }
     ],
-    "baseUrl": "src/",
     "paths": {
-      "@/*": ["*"],
-      "@migrations/schema": ["../migrations/schema"]
+      "@/*": ["./src/*"],
+      "@migrations/schema": ["./migrations/schema"]
     }
   },
   "include": [

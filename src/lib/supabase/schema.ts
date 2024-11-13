@@ -1,4 +1,3 @@
-
 import { pgTable, timestamp, uuid, text, jsonb , integer, boolean, foreignKey, pgPolicy,  } from "drizzle-orm/pg-core";
 import { prices, subscriptionStatus, users, } from "@migrations/schema";
 import { sql } from "drizzle-orm";
@@ -59,8 +58,8 @@ export const files = pgTable('files' , {
 export const subscriptions = pgTable("subscriptions", {
 	id: text().primaryKey().notNull(),
 	userId: uuid("user_id").notNull(),
-	status: subscriptionStatus('subscription_status'),
-	metadata: jsonb('metadata'),
+	status: subscriptionStatus(),
+	metadata: jsonb(),
 	priceId: text("price_id"),
 	quantity: integer(),
 	cancelAtPeriodEnd: boolean("cancel_at_period_end"),
@@ -72,18 +71,4 @@ export const subscriptions = pgTable("subscriptions", {
 	canceledAt: timestamp("canceled_at", { withTimezone: true, mode: 'string' }).default(sql`timezone('utc'::text, now())`),
 	trialStart: timestamp("trial_start", { withTimezone: true, mode: 'string' }).default(sql`timezone('utc'::text, now())`),
 	trialEnd: timestamp("trial_end", { withTimezone: true, mode: 'string' }).default(sql`timezone('utc'::text, now())`),
-}, (table) => {
-	return {
-		subscriptionsPriceIdFkey: foreignKey({
-			columns: [table.priceId],
-			foreignColumns: [prices.id],
-			name: "subscriptions_price_id_fkey"
-		}),
-		subscriptionsUserIdFkey: foreignKey({
-			columns: [table.userId],
-			foreignColumns: [users.id],
-			name: "subscriptions_user_id_fkey"
-		}),
-		canOnlyViewOwnSubsData: pgPolicy("Can only view own subs data.", { as: "permissive", for: "select", to: ["public"], using: sql`(( SELECT auth.uid() AS uid) = user_id)` }),
-	}
 });

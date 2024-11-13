@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import db from "@/lib/supabase/db";
-
+import { ThemeProvider } from "@/lib/providers/next-theme-provider";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -27,12 +27,14 @@ export default function RootLayout({
 }>) {
   console.log(db);
   return (
-    <html lang="en">
-      <body
-      
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+    <html lang="en" suppressHydrationWarning>
+      <body>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+        >
         {children}
+        </ThemeProvider>   
       </body>
     </html>
   );

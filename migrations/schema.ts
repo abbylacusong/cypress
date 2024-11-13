@@ -1,68 +1,10 @@
-import { pgTable, uuid, timestamp, text, foreignKey, pgPolicy, jsonb, boolean, check, bigint, integer, pgEnum } from "drizzle-orm/pg-core"
+import { pgTable, foreignKey, pgPolicy, uuid, text, jsonb, timestamp, boolean, check, bigint, integer, pgEnum } from "drizzle-orm/pg-core"
 import { sql } from "drizzle-orm"
 
 export const pricingPlanInterval = pgEnum("pricing_plan_interval", ['day', 'week', 'month', 'year'])
 export const pricingType = pgEnum("pricing_type", ['one_time', 'recurring'])
 export const subscriptionStatus = pgEnum("subscription_status", ['trialing', 'active', 'canceled', 'incomplete', 'incomplete_expired', 'past_due', 'unpaid'])
 
-
-export const workspaces = pgTable("workspaces", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
-	workspaceOwner: uuid("workspace_owner").notNull(),
-	title: text().notNull(),
-	iconId: text("icon_id").notNull(),
-	data: text(),
-	inTrash: text("in_trash"),
-	logo: text(),
-	bannerUrl: text("banner_url"),
-});
-
-export const folders = pgTable("folders", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
-	title: text().notNull(),
-	iconId: text("icon_id").notNull(),
-	data: text(),
-	inTrash: text("in_trash"),
-	logo: text(),
-	bannerUrl: text("banner_url"),
-	workspadeId: uuid("workspade_id"),
-}, (table) => {
-	return {
-		foldersWorkspadeIdWorkspacesIdFk: foreignKey({
-			columns: [table.workspadeId],
-			foreignColumns: [workspaces.id],
-			name: "folders_workspade_id_workspaces_id_fk"
-		}).onDelete("cascade"),
-	}
-});
-
-export const files = pgTable("files", {
-	id: uuid().defaultRandom().primaryKey().notNull(),
-	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
-	title: text().notNull(),
-	iconId: text("icon_id").notNull(),
-	data: text(),
-	inTrash: text("in_trash"),
-	logo: text(),
-	bannerUrl: text("banner_url"),
-	workspadeId: uuid("workspade_id"),
-	foldersId: uuid("folders_id"),
-}, (table) => {
-	return {
-		filesFoldersIdFoldersIdFk: foreignKey({
-			columns: [table.foldersId],
-			foreignColumns: [folders.id],
-			name: "files_folders_id_folders_id_fk"
-		}),
-		filesWorkspadeIdWorkspacesIdFk: foreignKey({
-			columns: [table.workspadeId],
-			foreignColumns: [workspaces.id],
-			name: "files_workspade_id_workspaces_id_fk"
-		}).onDelete("cascade"),
-	}
-});
 
 export const users = pgTable("users", {
 	id: uuid().primaryKey().notNull(),
@@ -80,7 +22,7 @@ export const users = pgTable("users", {
 			name: "users_id_fkey"
 		}),
 		canUpdateOwnUserData: pgPolicy("Can update own user data.", { as: "permissive", for: "update", to: ["public"], using: sql`(( SELECT auth.uid() AS uid) = id)` }),
-		everyonCanViewOnUserData: pgPolicy("Everyon can view on user data.", { as: "permissive", for: "select", to: ["public"] }),
+		everyoneCanViewUserData: pgPolicy("Everyone can view user data.", { as: "permissive", for: "select", to: ["public"] }),
 	}
 });
 
@@ -166,3 +108,65 @@ export const subscriptions = pgTable("subscriptions", {
 		canOnlyViewOwnSubsData: pgPolicy("Can only view own subs data.", { as: "permissive", for: "select", to: ["public"], using: sql`(( SELECT auth.uid() AS uid) = user_id)` }),
 	}
 });
+
+export const workspaces = pgTable("workspaces", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
+	workspaceOwner: uuid("workspace_owner").notNull(),
+	title: text().notNull(),
+	iconId: text("icon_id").notNull(),
+	data: text(),
+	inTrash: text("in_trash"),
+	logo: text(),
+	bannerUrl: text("banner_url"),
+});
+
+export const folders = pgTable("folders", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
+	title: text().notNull(),
+	iconId: text("icon_id").notNull(),
+	data: text(),
+	inTrash: text("in_trash"),
+	logo: text(),
+	bannerUrl: text("banner_url"),
+	workspadeId: uuid("workspade_id"),
+}, (table) => {
+	return {
+		foldersWorkspadeIdWorkspacesIdFk: foreignKey({
+			columns: [table.workspadeId],
+			foreignColumns: [workspaces.id],
+			name: "folders_workspade_id_workspaces_id_fk"
+		}).onDelete("cascade"),
+	}
+});
+
+export const files = pgTable("files", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+	createdAt: timestamp("created_at", { withTimezone: true, mode: 'string' }),
+	title: text().notNull(),
+	iconId: text("icon_id").notNull(),
+	data: text(),
+	inTrash: text("in_trash"),
+	logo: text(),
+	bannerUrl: text("banner_url"),
+	workspadeId: uuid("workspade_id"),
+	foldersId: uuid("folders_id"),
+}, (table) => {
+	return {
+		filesFoldersIdFoldersIdFk: foreignKey({
+			columns: [table.foldersId],
+			foreignColumns: [folders.id],
+			name: "files_folders_id_folders_id_fk"
+		}),
+		filesWorkspadeIdWorkspacesIdFk: foreignKey({
+			columns: [table.workspadeId],
+			foreignColumns: [workspaces.id],
+			name: "files_workspade_id_workspaces_id_fk"
+		}).onDelete("cascade"),
+	}
+});
+
+export const usersInAuth = pgTable("users_in_auth", {
+	id: uuid().defaultRandom().primaryKey().notNull(),
+})

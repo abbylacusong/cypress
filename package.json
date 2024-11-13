@@ -15,12 +15,19 @@
     "up": "drizzle-kit up"
   },
   "dependencies": {
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.1",
     "dotenv": "^16.4.5",
     "drizzle-orm": "^0.36.1",
+    "lucide-react": "^0.456.0",
     "next": "15.0.3",
+    "next-themes": "^0.4.3",
     "postgres": "^3.4.5",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+    "shadcdn": "^0.0.7",
+    "tailwind-merge": "^2.5.4",
+    "tailwindcss-animate": "^1.0.7",
     "tsx": "^4.19.2"
   },
   "devDependencies": {
