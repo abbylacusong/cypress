@@ -151,7 +151,7 @@ const HomePage = () => {
               <CustomCard 
                 key={card.planType}
                 className={clsx(
-                  'w-[350px] rounded-xl dark:bg-black/95 backdrop-blur-3xl relative',
+                  'w-[350px] rounded-xl dark:bg-black/40 backdrop-blur-3xl relative',
                   {'border-brand-primaryPurple/70':card.planType === PRICING_PLANS.proplan }
                 )}                 
                 cardHeader={
@@ -172,6 +172,9 @@ const HomePage = () => {
                     <span className='font-normal text-2xl'>${card.price}</span>
                     {+card.price > 0 ? ( <span className=' dark:text-washed-purple-800'>/mo</span> ) : ('')}
                     <p className='dark:text-washed-purple-800'>{card.description}</p>
+                    <Button variant='btn-primary' className='whitespace-nowrap w-full mt-4'>
+                      {card.planType === PRICING_PLANS.proplan ? 'Go Pro' : 'Get Started'}
+                    </Button>
                   </CardContent>
                 }
                 cardFooter = {

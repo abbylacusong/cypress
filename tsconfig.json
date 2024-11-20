@@ -27,7 +27,7 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@migrations/schema": ["./migrations/schema"]
+      "@migrations/schema": ["./migrations/schema"],
     }
   },
   "include": [
