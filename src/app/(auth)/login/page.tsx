@@ -1,5 +1,4 @@
 'use client'
-import { createClient } from '@/lib/utils/supabase/client'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as z from 'zod'
@@ -16,7 +15,6 @@ import Loader from '@/components/ui/Loader'
 import { actionLoginUser } from '@/lib/server-action/auth-action'
 
 const LoginPage = () => {
-    const supabase = createClient()
     const router = useRouter()
     const [ submitError , SetSubmitError ] = useState('') 
  
