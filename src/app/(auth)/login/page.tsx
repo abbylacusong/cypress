@@ -1,5 +1,4 @@
 'use client'
-import { createClient } from '@/lib/utils/supabase/client'
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import * as z from 'zod'
@@ -14,14 +13,14 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Loader from '@/components/ui/Loader'
 import { actionLoginUser } from '@/lib/server-action/auth-action'
+import { useEffect } from 'react'
 
 const LoginPage = () => {
-    const supabase = createClient()
     const router = useRouter()
-    const [ submitError , SetSubmitError ] = useState('') 
+    const [ submitError , setSubmitError ] = useState('') 
  
     const form = useForm<z.infer<typeof FormSchema>>({
-        mode : 'onChange',
+        mode : 'onSubmit',
         resolver : zodResolver(FormSchema),
         defaultValues : { email: "" , password : "" }
     })
@@ -29,10 +28,10 @@ const LoginPage = () => {
     const isLoading = form.formState.isSubmitting;
     const onSubmit:SubmitHandler<z.infer<typeof FormSchema>> = async (formData) => {
 
-        const {data , error} = await actionLoginUser(formData) 
+        const {error} = await actionLoginUser(formData)    
         if(error){
             form.reset()
-            SetSubmitError(error.message)
+            setSubmitError(error.message)
             return
         }
         router.replace('/dashboard')
@@ -41,9 +40,6 @@ const LoginPage = () => {
     return ( 
         <Form {...form}>
             <form 
-                onChange={() => {
-                    if(submitError) SetSubmitError('')
-                }}
                 onSubmit={form.handleSubmit(onSubmit)} 
                 className='w-full sm:justify-center sm:w-[400px] space-y-6 flex flex-col'            
             >
@@ -57,22 +53,31 @@ const LoginPage = () => {
                 <FormField 
                     control={form.control}
                     name="email"
+                    disabled={isLoading}
+
                     render={( {field} ) => (
                         <FormItem>
                             <FormControl>
-                                <Input type="email" placeholder="Email" {...field} disabled={isLoading} />
+                                <Input type="email" placeholder="Email" {...field}  />
                             </FormControl>
+                            {form.formState.errors.email && (
+                                <FormMessage>{form.formState.errors.email.message}</FormMessage>
+                            )}
                         </FormItem>
                     )}
                 />
                 <FormField 
                     control={form.control}
                     name="password"
+                    disabled={isLoading}
                     render={( {field} ) => (
                         <FormItem>
                             <FormControl>
-                                <Input type="password" placeholder="Password" {...field} disabled={isLoading} />
+                                <Input type="password" placeholder="Password" {...field} />
                             </FormControl>
+                            {form.formState.errors.password && (
+                                <FormMessage>{form.formState.errors.password.message}</FormMessage>
+                            )}
                         </FormItem>
                     )}
                 />  
@@ -91,3 +96,4 @@ const LoginPage = () => {
 }
 
 export default LoginPage
+

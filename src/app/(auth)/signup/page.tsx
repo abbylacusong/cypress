@@ -4,44 +4,22 @@ import { Button } from '@/components/ui/button'
 import { Form, FormDescription, FormField, FormItem, FormControl, FormMessage } from '@/components/ui/form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Logo from '../../../../public/cypresslogo.svg'
-import clsx from 'clsx'
 import Link from 'next/link'
-import { useRouter, useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import Loader from '@/components/ui/Loader'
 import { Input } from '@/components/ui/input'
-import React, { useMemo, useState } from 'react'
+import React, { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert'
 import { MailCheck } from 'lucide-react'
-
-const SignupFormSchema = z.object({
-    email : z.string().describe('Email').email({message : 'Invalid Email'}),
-    password : z.string().describe('Password').min(6," Password must contain 6 characters"),
-    confirmPassword : z.string().describe('Confirm Password').min(6," Password must contain 6 characters"),
-}).refine((data) => data.password === data.confirmPassword, {message : "Password don't match.", path : ['confirmPassword']} )
+import { SignupFormSchema } from '../../../lib/types'
+import { actionSignUpUser } from '@/lib/server-action/auth-action'
 
 const Signup = () => {
-    const router = useRouter()
-    const searchParams = useSearchParams()
     const [submitError , setSubmitError] = useState('')
     const [confirmation , setConfirmation] = useState(false)
 
-    const codeExchangeError = useMemo(() => {
-        if(!searchParams) return ''
-        return searchParams.get('error_description')
-    },[searchParams])
-
-    const ConfirmationAndErrorStyles = useMemo(
-        () => 
-            clsx('bg-primary', {
-                'bg-red-500/100' : codeExchangeError,
-                'border-red-500/50' : codeExchangeError,
-                'text-red-700' : codeExchangeError
-            }),
-        []
-    )
 
     const form = useForm<z.infer<typeof SignupFormSchema>>({
        mode : "onChange",
@@ -49,19 +27,23 @@ const Signup = () => {
        defaultValues : {email : "" , password : "" , confirmPassword : ""}
 
     })
-
     const isLoading = form.formState.isSubmitting;
-
-    const onSubmit = () => {}
-
-    const signupHandler = () => {}
+    const onSubmit = async ({ 
+        email, 
+        password 
+    }: z.infer<typeof SignupFormSchema>) => {
+        const { error } = await actionSignUpUser({ email, password });
+        if (error) {
+          setSubmitError(error.message)
+          form.reset()
+          return
+        }
+        setConfirmation(true);
+    }
 
   return (
     <Form {...form}>
         <form         
-            onChange={() => {
-            if (submitError) setSubmitError('')
-            }}
             onSubmit={form.handleSubmit(onSubmit)}
             className='w-full sm:justify-center sm:w-[400px] space-y-6 flex flex-col'
         >
@@ -74,57 +56,69 @@ const Signup = () => {
             </FormDescription>
 
 
-            {!confirmation && !codeExchangeError && 
+            {!confirmation && 
                 <>
                     <FormField 
                         control={form.control}
                         name="email"
+                        disabled={isLoading}
                         render={( {field} ) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input type="email" placeholder="Email" {...field} disabled={isLoading} />
+                                    <Input type="email" placeholder="Email" {...field} onChange={ (e) => { field.onChange(e); if (submitError) setSubmitError('') }} />
                                 </FormControl>
+                                {form.formState.errors.email && (
+                                    <FormMessage>{form.formState.errors.email.message}</FormMessage>
+                                )}
                             </FormItem>
                         )}
                     />
                     <FormField 
                         control={form.control}
                         name="password"
+                        disabled={isLoading}
                         render={( {field} ) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input type="password" placeholder="Password" {...field} disabled={isLoading} />
+                                    <Input type="password" placeholder="Password" {...field}  onChange={ (e) => { field.onChange(e); if (submitError) setSubmitError('') }} />
                                 </FormControl>
+                                {form.formState.errors.password && (
+                                    <FormMessage>{form.formState.errors.password.message}</FormMessage>
+                                )}
                             </FormItem>
                         )}
                     /> 
                     <FormField 
                         control={form.control}
                         name="confirmPassword"
+                        disabled={isLoading} 
                         render={( {field} ) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input type="password" placeholder="Confirm Password" {...field} disabled={isLoading} />
+                                    <Input type="password" placeholder="Confirm Password" {...field} onChange={ (e) => { field.onChange(e); if (submitError) setSubmitError('') }}/>
                                 </FormControl>
+                                {form.formState.errors.confirmPassword && (
+                                    <FormMessage>{form.formState.errors.confirmPassword.message}</FormMessage>
+                                )}
                             </FormItem>
                         )}
                     />                     
-                    <Button type="button" className='w-full p-6'  disabled = {isLoading}>{!isLoading? "Create account" : <Loader />}</Button>
+                    <Button type="submit" className='w-full p-6'  disabled = {isLoading}>{!isLoading? "Create account" : <Loader />}</Button>
                 </> 
             } 
             {submitError && <FormMessage>{submitError}</FormMessage>}  
             <span className='self-container'>
                 Already have an Account?{' '}
-                <Link href="/login" className='text-primary'>Login</Link>
+                <Link href="/login" className='text-primary gap-1 hover:underline'>Login</Link>
             </span>   
-            {(confirmation || codeExchangeError) && <>
-                <Alert variant={'destructive'} className={ConfirmationAndErrorStyles}>
-                    {!codeExchangeError && <MailCheck className='h-4 w-4' />}
+            {(confirmation ) && <>
+                <Alert variant={'default'}>
+                    {<MailCheck className='h-4 w-4' />}
                     <AlertTitle>
-                        {codeExchangeError ? "Invalid Link" :"Check your Email."}
+                        Check your Email.
                     </AlertTitle>
                     <AlertDescription>
-                        {codeExchangeError || 'An Email confirmation has been sent.'}
+                        An Email confirmation has been sent.
                     </AlertDescription>
                 </Alert>
             </>}

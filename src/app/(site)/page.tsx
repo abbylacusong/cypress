@@ -40,7 +40,7 @@ const HomePage = () => {
           </div> 
         </section>
         <section className='relative'>
-          <div 
+          <div
             className="
               overflow-hidden 
               flex
@@ -68,7 +68,7 @@ const HomePage = () => {
               before:absolute
             "         
           >
-          {[...Array(2)].map((index) => (
+          {[...Array(2)].map((_,index) => (
             <div key={index} className="flex flex-nowrap animate-slide">
               {CLIENTS.map((client) => (
                 <div key={client.alt} className="relative w-[200px] m-20 shrink-0 flex items-center">
