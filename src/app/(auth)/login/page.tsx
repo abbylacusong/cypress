@@ -13,7 +13,6 @@ import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
 import Loader from '@/components/ui/Loader'
 import { actionLoginUser } from '@/lib/server-action/auth-action'
-import { useEffect } from 'react'
 
 const LoginPage = () => {
     const router = useRouter()

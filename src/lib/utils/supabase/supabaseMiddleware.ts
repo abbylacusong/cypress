@@ -1,8 +1,12 @@
 import { createServerClient } from '@supabase/ssr'
-import next from 'next'
 import { NextResponse, type NextRequest } from 'next/server'
 
 export async function updateSession(request: NextRequest) {
+  if (!request.cookies) {
+    console.warn("No cookies found; skipping session update.");
+    return NextResponse.next();
+  }
+
   let supabaseResponse = NextResponse.next({
     request,
   })
