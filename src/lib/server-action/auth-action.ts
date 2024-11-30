@@ -19,7 +19,17 @@ export async function actionLoginUser({
     return { data, error }
 }
 
-export async function actionSignupUser({}){
+export async function actionSignUpUser({email, password}:z.infer<typeof FormSchema>){
+    const supabase = await createClient()
+    const { data } = await supabase.from('users').select('*').eq('email', email)
 
-    
+    if(data?.length){
+        return { error: { message : 'User already exists'} }
+    } 
+    const response = await supabase.auth.signUp({
+        email,
+        password
+    })
+
+    return { response }
 }
